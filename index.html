@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure EMDR Tool with Roles</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 { margin-bottom: 0.5rem; font-size: 1.8rem; color: #00adb5; }
+        .subtitle { color: #aaaaaa; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .status { padding: 0.75rem; border-radius: 8px; margin-bottom: 1.5rem; font-weight: bold; background-color: #ff4d4d; }
+        .status.connected { background-color: #00c853; }
+        .status.remote-only { background-color: #f1c40f; color: #121212; }
+        
+        .room-box {
+            background-color: #2a2a2a;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .room-box label { font-weight: bold; margin-bottom: 0.5rem; display: block; }
+        .room-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+        .room-box input {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #121212;
+            color: #fff;
+            font-size: 1rem;
+        }
+        .role-row {
+            display: flex;
+            justify-content: space-around;
+            background: #121212;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #444;
+            margin-bottom: 0.75rem;
+        }
+        .role-option { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+        .room-box button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #00adb5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .room-box button:hover { background-color: #008c95; }
+        
+        .app-content { display: none; }
+        .app-content.active { display: block; }
+
+        .patient-hidden { display: block; }
+        body.is-patient .patient-hidden { display: none !important; }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #2a2a2a;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        .switch-label { font-weight: bold; color: #eeeeee; }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555555; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: #00adb5; }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .control-group { margin-bottom: 1.5rem; text-align: left; }
+        label { display: block; margin-bottom: 0.5rem; color: #eeeeee; font-size: 0.9rem; }
+        input[type="range"] { width: 100%; margin-bottom: 0.25rem; }
+        .value-display { font-size: 0.85rem; color: #00adb5; text-align: right; display: block; }
+        
+        .side-indicator { display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.8rem; font-weight: bold; color: #555555; }
+        .side-indicator .active { color: #00adb5; }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>EMDR Tappers</h1>
+    <div class="subtitle">Secure Bilateral Stimulation</div>
+
+    <div class="room-box" id="setup-box">
+        <label for="room-input">1. Session Setup</label>
+        <div class="room-row">
+            <input type="text" id="room-input" placeholder="Enter room code">
+        </div>
+        
+        <label>2. Choose Your Role</label>
+        <div class="role-row">
+            <label class="role-option">
+                <input type="radio" name="role-select" value="therapist" checked>
+                Therapist
+            </label>
+            <label class="role-option">
+                <input type="radio" name="role-select" value="patient">
+                Patient
+            </label>
+        </div>
+        
+        <button id="join-btn">Connect to Session</button>
+    </div>
+    
+    <div id="app-content" class="app-content">
+        <div id="status" class="status">Controller Disconnected (Awaiting Button Press)</div>
+        
+        <div class="patient-hidden">
+            <div class="switch-container">
+                <span class="switch-label">Bilateral Stimulation</span>
+                <label class="switch">
+                    <input type="checkbox" id="power-switch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="control-group">
+                <label for="speed">Interval Speed (Time between sides)</label>
+                <input type="range" id="speed" min="200" max="2000" value="600" step="50">
+                <span class="value-display" id="speed-val">600 ms</span>
+            </div>
+
+            <div class="control-group">
+                <label for="duration">Pulse Duration (Length of tap)</label>
+                <input type="range" id="duration" min="40" max="500" value="120" step="10">
+                <span class="value-display" id="duration-val">120 ms</span>
+            </div>
+
+            <div class="control-group">
+                <label for="intensity">Vibration Intensity</label>
+                <input type="range" id="intensity" min="0.1" max="1" value="0.6" step="0.05">
+                <span class="value-display" id="intensity-val">60%</span>
+            </div>
+        </div>
+
+        <div class="side-indicator">
+            <span id="left-label">◄ LEFT MOTOR</span>
+            <span id="right-label">RIGHT MOTOR ►</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const socket = io();
+
+    const setupBox = document.getElementById('setup-box');
+    const roomInput = document.getElementById('room-input');
+    const joinBtn = document.getElementById('join-btn');
+    const appContent = document.getElementById('app-content');
+
+    const statusDiv = document.getElementById('status');
+    const powerSwitch = document.getElementById('power-switch');
+    const speedSlider = document.getElementById('speed');
+    const durationSlider = document.getElementById('duration');
+    const intensitySlider = document.getElementById('intensity');
+    
+    const speedVal = document.getElementById('speed-val');
+    const durationVal = document.getElementById('duration-val');
+    const intensityVal = document.getElementById('intensity-val');
+    
+    const leftLabel = document.getElementById('left-label');
+    const rightLabel = document.getElementById('right-label');
+
+    let gamepadIndex = null;
+    let rhythmTimeout = null;
+    let isLeftTurn = true;
+    let inRoom = false;
+    let userRole = 'therapist';
+
+    joinBtn.addEventListener('click', () => {
+        const code = roomInput.value.trim();
+        const selectedRole = document.querySelector('input[name="role-select"]:checked').value;
+        
+        if (code.length < 3) {
+            alert("Please enter a room code (at least 3 characters long).");
+            return;
+        }
+
+        userRole = selectedRole;
+        socket.emit('joinRoom', code);
+        
+        setupBox.style.display = 'none';
+        appContent.classList.add('active');
+        inRoom = true;
+
+        if (userRole === 'patient') {
+            document.body.classList.add('is-patient');
+            statusDiv.textContent = "Connected to Therapist. Awaiting Controller...";
+            statusDiv.className = "status connected";
+        } else {
+            statusDiv.textContent = "Therapist Session Active (No Controller Needed)";
+            statusDiv.className = "status remote-only";
+        }
+    });
+
+    window.addEventListener("gamepadconnected", (e) => {
+        gamepadIndex = e.gamepad.index;
+        if (inRoom && userRole === 'patient') {
+            statusDiv.textContent = "Controller Ready & Paired with Therapist";
+            statusDiv.className = "status connected";
+        }
+    });
+
+    window.addEventListener("gamepaddisconnected", (e) => {
+        if (gamepadIndex === e.gamepad.index) {
+            gamepadIndex = null;
+            if (inRoom && userRole === 'patient') {
+                statusDiv.textContent = "Controller Disconnected!";
+                statusDiv.className = "status";
+            }
+            stopRhythm();
+        }
+    });
+
+    function broadcastSettings() {
+        if (!inRoom || userRole !== 'therapist') return;
+        socket.emit('updateControls', {
+            enabled: powerSwitch.checked,
+            speed: speedSlider.value,
+            duration: durationSlider.value,
+            intensity: intensitySlider.value
+        });
+    }
+
+    [speedSlider, durationSlider, intensitySlider].forEach(slider => {
+        slider.addEventListener('input', () => {
+            updateUIValues();
+            broadcastSettings();
+        });
+    });
+    
+    powerSwitch.addEventListener('change', () => {
+        if (powerSwitch.checked) startRhythm();
+        else stopRhythm();
+        broadcastSettings();
+    });
+
+    socket.on('applyControls', (data) => {
+        powerSwitch.checked = data.enabled;
+        speedSlider.value = data.speed;
+        durationSlider.value = data.duration;
+        intensitySlider.value = data.intensity;
+        
+        updateUIValues();
+
+        if (data.enabled) startRhythm();
+        else stopRhythm();
+    });
+
+    function updateUIValues() {
+        speedVal.textContent = `${speedSlider.value} ms`;
+        durationVal.textContent = `${durationSlider.value} ms`;
+        intensityVal.textContent = `${Math.round(intensitySlider.value * 100)}%`;
+    }
+
+    function startRhythm() {
+        stopRhythm();
+        
+        const runRhythm = () => {
+            if (!powerSwitch.checked) return;
+
+            const speed = parseInt(speedSlider.value);
+            const duration = parseInt(durationSlider.value);
+            const intensity = parseFloat(intensitySlider.value);
+            
+            if (userRole === 'patient' && gamepadIndex !== null) {
+                const gamepad = navigator.getGamepads()[gamepadIndex];
+                if (gamepad && gamepad.vibrationActuator) {
+                    const leftMag = isLeftTurn ? intensity : 0;
+                    const rightMag = isLeftTurn ? 0 : intensity;
+
+                    gamepad.vibrationActuator.playEffect("dual-rumble", {
+                        startDelay: 0,
+                        duration: duration,
+                        strongMagnitude: leftMag,
+                        weakMagnitude: rightMag
+                    }).catch(() => {});
+                }
+            }
+
+            if (isLeftTurn) {
+                leftLabel.className = "active";
+                rightLabel.className = "";
+            } else {
+                leftLabel.className = "";
+                rightLabel.className = "active";
+            }
+
+            isLeftTurn = !isLeftTurn;
+            rhythmTimeout = setTimeout(runRhythm, speed);
+        };
+
+        runRhythm();
+    }
+
+    function stopRhythm() {
+        if (rhythmTimeout) clearTimeout(rhythmTimeout);
+        leftLabel.className = "";
+        rightLabel.className = "";
+        isLeftTurn = true;
+    }
+</script>
+</body>
+</html>
