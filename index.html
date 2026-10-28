@@ -158,6 +158,29 @@
         
         .side-indicator { display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.8rem; font-weight: bold; color: #555555; }
         .side-indicator .active { color: #00adb5; }
+        
+        .patient-killswitch-container {
+            display: none;
+            margin-bottom: 2rem;
+        }
+        body.is-patient .patient-killswitch-container {
+            display: block;
+        }
+        .kill-btn {
+            width: 100%;
+            padding: 1rem;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+            transition: background 0.2s, transform 0.1s;
+        }
+        .kill-btn:hover { background-color: #ff1a1a; }
+        .kill-btn:active { transform: scale(0.98); }
     </style>
     <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -167,6 +190,7 @@
     <h1>EMDR Tappers</h1>
     <div class="subtitle">Secure Bilateral Stimulation</div>
 
+    <!-- Secure Connection Box -->
     <div class="room-box" id="setup-box">
         <label>1. Select Your Role</label>
         <div class="role-switch-container" id="role-toggle-bar">
@@ -189,9 +213,16 @@
         <button id="join-btn">Start Session</button>
     </div>
     
+    <!-- Workspace Area (Initially hidden) -->
     <div id="app-content" class="app-content">
         <div id="status" class="status">Controller Disconnected (Awaiting Button Press)</div>
         
+        <!-- Patient Emergency Stop Button -->
+        <div class="patient-killswitch-container">
+            <button class="kill-btn" id="patient-stop-btn">STOP STIMULATION</button>
+        </div>
+        
+        <!-- Controls (Hidden automatically if Patient is chosen) -->
         <div class="patient-hidden">
             <div class="switch-container">
                 <span class="switch-label">Bilateral Stimulation</span>
@@ -202,9 +233,9 @@
             </div>
             
             <div class="control-group">
-                <label for="speed">Interval Speed (Time between sides)</label>
-                <input type="range" id="speed" min="200" max="2000" value="600" step="50">
-                <span class="value-display" id="speed-val">600 ms</span>
+                <label for="speed">Speed (Slow to Fast)</label>
+                <input type="range" id="speed" min="1" max="10" value="6" step="1">
+                <span class="value-display" id="speed-val">Level 6</span>
             </div>
 
             <div class="control-group">
@@ -220,6 +251,7 @@
             </div>
         </div>
 
+        <!-- Shared Visual Tracking Indicator -->
         <div class="side-indicator">
             <span id="left-label">◄ LEFT MOTOR</span>
             <span id="right-label">RIGHT MOTOR ►</span>
@@ -230,6 +262,7 @@
 <script>
     const socket = io();
 
+    // Login UI Controls
     const toggleBar = document.getElementById('role-toggle-bar');
     const btnTherapist = document.getElementById('btn-therapist');
     const btnPatient = document.getElementById('btn-patient');
@@ -242,11 +275,13 @@
     const setupBox = document.getElementById('setup-box');
     const appContent = document.getElementById('app-content');
 
+    // Dashboard Controls
     const statusDiv = document.getElementById('status');
     const powerSwitch = document.getElementById('power-switch');
     const speedSlider = document.getElementById('speed');
     const durationSlider = document.getElementById('duration');
     const intensitySlider = document.getElementById('intensity');
+    const patientStopBtn = document.getElementById('patient-stop-btn');
     
     const speedVal = document.getElementById('speed-val');
     const durationVal = document.getElementById('duration-val');
@@ -261,6 +296,14 @@
     let inRoom = false;
     let userRole = 'therapist';
     let activeRoomCode = "";
+
+    // Map speed level (1 to 10) to ms interval delay (2000ms down to 200ms)
+    // Level 1 = 2000ms (Slowest), Level 10 = 200ms (Fastest)
+    function getIntervalFromSpeedLevel(level) {
+        const minInterval = 200;
+        const maxInterval = 2000;
+        return maxInterval - ((level - 1) * (maxInterval - minInterval) / 9);
+    }
 
     function makeRandomCode() {
         const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -369,6 +412,23 @@
         broadcastSettings();
     });
 
+    // Patient Stop Button functionality
+    if (patientStopBtn) {
+        patientStopBtn.addEventListener('click', () => {
+            if (userRole === 'patient' && inRoom) {
+                // Shut off locally immediately
+                stopRhythm();
+                // Send command back upstream to stop the therapist's panel
+                socket.emit('updateControls', {
+                    enabled: false,
+                    speed: speedSlider.value,
+                    duration: durationSlider.value,
+                    intensity: intensitySlider.value
+                });
+            }
+        });
+    }
+
     socket.on('applyControls', (data) => {
         powerSwitch.checked = data.enabled;
         speedSlider.value = data.speed;
@@ -382,7 +442,7 @@
     });
 
     function updateUIValues() {
-        speedVal.textContent = `${speedSlider.value} ms`;
+        speedVal.textContent = `Level ${speedSlider.value}`;
         durationVal.textContent = `${durationSlider.value} ms`;
         intensityVal.textContent = `${Math.round(intensitySlider.value * 100)}%`;
     }
@@ -393,7 +453,8 @@
         const runRhythm = () => {
             if (!powerSwitch.checked) return;
 
-            const speed = parseInt(speedSlider.value);
+            const speedLevel = parseInt(speedSlider.value);
+            const intervalMs = getIntervalFromSpeedLevel(speedLevel);
             const duration = parseInt(durationSlider.value);
             const intensity = parseFloat(intensitySlider.value);
             
@@ -421,7 +482,7 @@
             }
 
             isLeftTurn = !isLeftTurn;
-            rhythmTimeout = setTimeout(runRhythm, speed);
+            rhythmTimeout = setTimeout(runRhythm, intervalMs);
         };
 
         runRhythm();
