@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure EMDR Tool with Roles</title>
+    <title>Secure Remote EMDR Tool</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -26,10 +26,30 @@
         }
         h1 { margin-bottom: 0.5rem; font-size: 1.8rem; color: #00adb5; }
         .subtitle { color: #aaaaaa; font-size: 0.9rem; margin-bottom: 1.5rem; }
-        .status { padding: 0.75rem; border-radius: 8px; margin-bottom: 1.5rem; font-weight: bold; background-color: #ff4d4d; }
+        .status { padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-weight: bold; background-color: #ff4d4d; }
         .status.connected { background-color: #00c853; }
         .status.remote-only { background-color: #f1c40f; color: #121212; }
         
+        .roster-box {
+            display: flex;
+            justify-content: space-around;
+            background-color: #121212;
+            padding: 0.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+            font-size: 0.85rem;
+        }
+        .roster-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #555;
+            margin-right: 5px;
+        }
+        .roster-dot.online { background-color: #00c853; box-shadow: 0 0 8px #00c853; }
+
         .room-box {
             background-color: #2a2a2a;
             padding: 1.5rem;
@@ -60,9 +80,7 @@
             z-index: 2;
             transition: color 0.2s ease;
         }
-        .role-btn.active {
-            color: #ffffff;
-        }
+        .role-btn.active { color: #ffffff; }
         .switch-slider {
             position: absolute;
             top: 2px;
@@ -74,9 +92,7 @@
             z-index: 1;
             transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        body.select-patient .switch-slider {
-            transform: translateX(100%);
-        }
+        body.select-patient .switch-slider { transform: translateX(100%); }
 
         .input-area { margin-bottom: 1.25rem; }
         .code-display {
@@ -91,12 +107,7 @@
             border: 1px dashed #00adb5;
             margin-bottom: 0.5rem;
         }
-        .code-instruction {
-            font-size: 0.8rem;
-            color: #aaaaaa;
-            text-align: center;
-            display: block;
-        }
+        .code-instruction { font-size: 0.8rem; color: #aaaaaa; text-align: center; display: block; }
         .room-box input[type="text"] {
             width: 100%;
             box-sizing: border-box;
@@ -109,10 +120,6 @@
             text-align: center;
             letter-spacing: 2px;
         }
-        .room-box input[type="text"]:focus {
-            border-color: #00adb5;
-            outline: none;
-        }
         
         .room-box button {
             width: 100%;
@@ -124,7 +131,6 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 1.1rem;
-            transition: background 0.2s;
         }
         .room-box button:hover { background-color: #008c95; }
         
@@ -133,6 +139,23 @@
 
         .patient-hidden { display: block; }
         body.is-patient .patient-hidden { display: none !important; }
+
+        .patient-panic-box { display: none; margin-bottom: 2rem; }
+        body.is-patient .patient-panic-box { display: block; }
+        .panic-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background-color: #d63031;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(214, 48, 49, 0.4);
+            transition: background 0.2s;
+        }
+        .panic-btn:hover { background-color: #b32627; }
 
         .switch-container {
             display: flex;
@@ -158,29 +181,6 @@
         
         .side-indicator { display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.8rem; font-weight: bold; color: #555555; }
         .side-indicator .active { color: #00adb5; }
-        
-        .patient-killswitch-container {
-            display: none;
-            margin-bottom: 2rem;
-        }
-        body.is-patient .patient-killswitch-container {
-            display: block;
-        }
-        .kill-btn {
-            width: 100%;
-            padding: 1rem;
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
-            transition: background 0.2s, transform 0.1s;
-        }
-        .kill-btn:hover { background-color: #ff1a1a; }
-        .kill-btn:active { transform: scale(0.98); }
     </style>
     <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -190,7 +190,6 @@
     <h1>EMDR Tappers</h1>
     <div class="subtitle">Secure Bilateral Stimulation</div>
 
-    <!-- Secure Connection Box -->
     <div class="room-box" id="setup-box">
         <label>1. Select Your Role</label>
         <div class="role-switch-container" id="role-toggle-bar">
@@ -203,7 +202,7 @@
         <div class="input-area">
             <div id="therapist-code-view">
                 <div class="code-display" id="generated-code-text">XXXX</div>
-                <span class="code-instruction">Share this short code with your patient.</span>
+                <span class="code-instruction">Share this code with your patient.</span>
             </div>
             <div id="patient-code-view" style="display: none;">
                 <input type="text" id="room-input" placeholder="Enter 4-character code" maxlength="4">
@@ -213,16 +212,18 @@
         <button id="join-btn">Start Session</button>
     </div>
     
-    <!-- Workspace Area (Initially hidden) -->
     <div id="app-content" class="app-content">
-        <div id="status" class="status">Controller Disconnected (Awaiting Button Press)</div>
-        
-        <!-- Patient Emergency Stop Button -->
-        <div class="patient-killswitch-container">
-            <button class="kill-btn" id="patient-stop-btn">STOP STIMULATION</button>
+        <div id="status" class="status">Disconnected</div>
+
+        <div class="roster-box">
+            <span><span id="roster-t-dot" class="roster-dot"></span>Therapist</span>
+            <span><span id="roster-p-dot" class="roster-dot"></span>Patient</span>
         </div>
         
-        <!-- Controls (Hidden automatically if Patient is chosen) -->
+        <div class="patient-panic-box">
+            <button class="panic-btn" id="panic-stop-btn">STOP STIMULATION</button>
+        </div>
+
         <div class="patient-hidden">
             <div class="switch-container">
                 <span class="switch-label">Bilateral Stimulation</span>
@@ -233,9 +234,9 @@
             </div>
             
             <div class="control-group">
-                <label for="speed">Speed (Slow to Fast)</label>
-                <input type="range" id="speed" min="1" max="10" value="6" step="1">
-                <span class="value-display" id="speed-val">Level 6</span>
+                <label for="speed">Speed (Slow ◄► Fast)</label>
+                <input type="range" id="speed" min="1" max="10" value="5" step="1">
+                <span class="value-display" id="speed-val">Level 5</span>
             </div>
 
             <div class="control-group">
@@ -251,7 +252,6 @@
             </div>
         </div>
 
-        <!-- Shared Visual Tracking Indicator -->
         <div class="side-indicator">
             <span id="left-label">◄ LEFT MOTOR</span>
             <span id="right-label">RIGHT MOTOR ►</span>
@@ -262,8 +262,7 @@
 <script>
     const socket = io();
 
-    // Login UI Controls
-    const toggleBar = document.getElementById('role-toggle-bar');
+    const setupBox = document.getElementById('setup-box');
     const btnTherapist = document.getElementById('btn-therapist');
     const btnPatient = document.getElementById('btn-patient');
     const inputHeading = document.getElementById('input-heading');
@@ -272,16 +271,14 @@
     const codeText = document.getElementById('generated-code-text');
     const roomInput = document.getElementById('room-input');
     const joinBtn = document.getElementById('join-btn');
-    const setupBox = document.getElementById('setup-box');
     const appContent = document.getElementById('app-content');
 
-    // Dashboard Controls
     const statusDiv = document.getElementById('status');
     const powerSwitch = document.getElementById('power-switch');
     const speedSlider = document.getElementById('speed');
     const durationSlider = document.getElementById('duration');
     const intensitySlider = document.getElementById('intensity');
-    const patientStopBtn = document.getElementById('patient-stop-btn');
+    const panicStopBtn = document.getElementById('panic-stop-btn');
     
     const speedVal = document.getElementById('speed-val');
     const durationVal = document.getElementById('duration-val');
@@ -289,6 +286,8 @@
     
     const leftLabel = document.getElementById('left-label');
     const rightLabel = document.getElementById('right-label');
+    const rosterTDot = document.getElementById('roster-t-dot');
+    const rosterPDot = document.getElementById('roster-p-dot');
 
     let gamepadIndex = null;
     let rhythmTimeout = null;
@@ -297,13 +296,10 @@
     let userRole = 'therapist';
     let activeRoomCode = "";
 
-    // Map speed level (1 to 10) to ms interval delay (2000ms down to 200ms)
-    // Level 1 = 2000ms (Slowest), Level 10 = 200ms (Fastest)
-    function getIntervalFromSpeedLevel(level) {
-        const minInterval = 200;
-        const maxInterval = 2000;
-        return maxInterval - ((level - 1) * (maxInterval - minInterval) / 9);
-    }
+    const speedMapping = {
+        1: 1500, 2: 1200, 3: 1000, 4: 800, 5: 650, 
+        6: 500,  7: 400,  8: 320,  9: 250, 10: 180
+    };
 
     function makeRandomCode() {
         const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -342,19 +338,17 @@
     btnPatient.addEventListener('click', () => setRole('patient'));
 
     joinBtn.addEventListener('click', () => {
-        let finalCode = "";
-        
         if (userRole === 'therapist') {
-            finalCode = activeRoomCode;
+            window.activeRoom = activeRoomCode;
         } else {
-            finalCode = roomInput.value.trim().toUpperCase();
-            if (finalCode.length !== 4) {
+            window.activeRoom = roomInput.value.trim().toUpperCase();
+            if (window.activeRoom.length !== 4) {
                 alert("Please enter the exact 4-character code provided by the therapist.");
                 return;
             }
         }
 
-        socket.emit('joinRoom', finalCode);
+        socket.emit('joinRoom', { roomCode: window.activeRoom, role: userRole });
         
         setupBox.style.display = 'none';
         appContent.classList.add('active');
@@ -362,10 +356,10 @@
 
         if (userRole === 'patient') {
             document.body.classList.add('is-patient');
-            statusDiv.textContent = "Connected to Therapist. Awaiting Controller...";
+            statusDiv.textContent = "Connected. Awaiting Controller Binding...";
             statusDiv.className = "status connected";
         } else {
-            statusDiv.textContent = "Therapist Session Active (No Controller Needed)";
+            statusDiv.textContent = "Session Active";
             statusDiv.className = "status remote-only";
         }
     });
@@ -373,7 +367,7 @@
     window.addEventListener("gamepadconnected", (e) => {
         gamepadIndex = e.gamepad.index;
         if (inRoom && userRole === 'patient') {
-            statusDiv.textContent = "Controller Ready & Paired with Therapist";
+            statusDiv.textContent = "Controller Synced & Ready";
             statusDiv.className = "status connected";
         }
     });
@@ -412,22 +406,16 @@
         broadcastSettings();
     });
 
-    // Patient Stop Button functionality
-    if (patientStopBtn) {
-        patientStopBtn.addEventListener('click', () => {
-            if (userRole === 'patient' && inRoom) {
-                // Shut off locally immediately
-                stopRhythm();
-                // Send command back upstream to stop the therapist's panel
-                socket.emit('updateControls', {
-                    enabled: false,
-                    speed: speedSlider.value,
-                    duration: durationSlider.value,
-                    intensity: intensitySlider.value
-                });
-            }
+    panicStopBtn.addEventListener('click', () => {
+        powerSwitch.checked = false;
+        stopRhythm();
+        socket.emit('updateControls', {
+            enabled: false,
+            speed: speedSlider.value,
+            duration: durationSlider.value,
+            intensity: intensitySlider.value
         });
-    }
+    });
 
     socket.on('applyControls', (data) => {
         powerSwitch.checked = data.enabled;
@@ -439,6 +427,14 @@
 
         if (data.enabled) startRhythm();
         else stopRhythm();
+    });
+
+    socket.on('rosterUpdate', (presence) => {
+        if (presence.therapist) rosterTDot.classList.add('online');
+        else rosterTDot.classList.remove('online');
+
+        if (presence.patient) rosterPDot.classList.add('online');
+        else rosterPDot.classList.remove('online');
     });
 
     function updateUIValues() {
@@ -453,8 +449,8 @@
         const runRhythm = () => {
             if (!powerSwitch.checked) return;
 
-            const speedLevel = parseInt(speedSlider.value);
-            const intervalMs = getIntervalFromSpeedLevel(speedLevel);
+            const sliderLevel = parseInt(speedSlider.value);
+            const actualInterval = speedMapping[sliderLevel] || 600; 
             const duration = parseInt(durationSlider.value);
             const intensity = parseFloat(intensitySlider.value);
             
@@ -482,7 +478,7 @@
             }
 
             isLeftTurn = !isLeftTurn;
-            rhythmTimeout = setTimeout(runRhythm, intervalMs);
+            rhythmTimeout = setTimeout(runRhythm, actualInterval);
         };
 
         runRhythm();

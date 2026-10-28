@@ -9,25 +9,52 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname)));
 
+// Track which users are in which rooms: { roomCode: { socketId: role } }
+const roomRosters = {};
+
+function updateAndBroadcastRoster(io, roomCode) {
+    if (!roomRosters[roomCode]) return;
+
+    const rolesInRoom = Object.values(roomRosters[roomCode]);
+    const therapistPresent = rolesInRoom.includes('therapist');
+    const patientPresent = rolesInRoom.includes('patient');
+
+    io.to(roomCode).emit('rosterUpdate', {
+        therapist: therapistPresent,
+        patient: patientPresent
+    });
+}
+
 io.on('connection', (socket) => {
     let currentRoom = null;
 
-    // Handle joining a specific room
-    socket.on('joinRoom', (roomCode) => {
-        // Clean up code formatting
-        const cleanRoom = roomCode.trim().toLowerCase();
+    socket.on('joinRoom', ({ roomCode, role }) => {
+        const cleanRoom = roomCode.trim().toUpperCase();
         
-        // Leave previous room if switching
         if (currentRoom) {
             socket.leave(currentRoom);
+            if (roomRosters[currentRoom]) {
+                delete roomRosters[currentRoom][socket.id];
+                if (Object.keys(roomRosters[currentRoom]).length === 0) {
+                    delete roomRosters[currentRoom];
+                } else {
+                    updateAndBroadcastRoster(io, currentRoom);
+                }
+            }
         }
         
         currentRoom = cleanRoom;
         socket.join(currentRoom);
-        console.log(`User ${socket.id} joined room: ${currentRoom}`);
+
+        if (!roomRosters[currentRoom]) {
+            roomRosters[currentRoom] = {};
+        }
+        roomRosters[currentRoom][socket.id] = role;
+
+        console.log(`User ${socket.id} (${role}) joined room: ${currentRoom}`);
+        updateAndBroadcastRoster(io, currentRoom);
     });
 
-    // Broadcast updates strictly to the user's specific room
     socket.on('updateControls', (data) => {
         if (currentRoom) {
             socket.to(currentRoom).emit('applyControls', data);
@@ -35,7 +62,15 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+        if (currentRoom && roomRosters[currentRoom]) {
+            delete roomRosters[currentRoom][socket.id];
+            if (Object.keys(roomRosters[currentRoom]).length === 0) {
+                delete roomRosters[currentRoom];
+            } else {
+                updateAndBroadcastRoster(io, currentRoom);
+            }
+            console.log(`User ${socket.id} left room: ${currentRoom}`);
+        }
     });
 });
 
