@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const https = require('https');
 
 const app = express();
 const server = http.createServer(app);
@@ -9,12 +10,10 @@ const io = new Server(server);
 
 app.use(express.static(path.join(__dirname)));
 
-// Track room states including rosters and structural state flags
 const roomStates = {};
 
 function updateAndBroadcastState(io, roomCode) {
     if (!roomStates[roomCode]) return;
-
     const roster = roomStates[roomCode].roster;
     const rolesInRoom = Object.values(roster);
     
@@ -58,12 +57,9 @@ io.on('connection', (socket) => {
             };
         }
         roomStates[currentRoom].roster[socket.id] = role;
-
-        console.log(`User ${socket.id} (${role}) joined room: ${currentRoom}`);
         updateAndBroadcastState(io, currentRoom);
     });
 
-    // Handle updates when a patient connects/disconnects a controller hardware component
     socket.on('updateGamepadStatus', (status) => {
         if (currentRoom && roomStates[currentRoom]) {
             roomStates[currentRoom].controllerReady = status.ready;
@@ -71,19 +67,16 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle updates when the patient activates the emergency panic freeze override
     socket.on('patientEmergencyStop', () => {
         if (currentRoom && roomStates[currentRoom]) {
             roomStates[currentRoom].stoppedByPatient = true;
             updateAndBroadcastState(io, currentRoom);
-            // Alert therapist directly to switch off the master toggle
             socket.to(currentRoom).emit('applyControls', { enabled: false });
         }
     });
 
     socket.on('updateControls', (data) => {
         if (currentRoom && roomStates[currentRoom]) {
-            // If therapist starts stimulation again, clear the emergency warning sign automatically
             if (data.enabled) {
                 roomStates[currentRoom].stoppedByPatient = false;
             }
@@ -100,10 +93,22 @@ io.on('connection', (socket) => {
             } else {
                 updateAndBroadcastState(io, currentRoom);
             }
-            console.log(`User ${socket.id} left room: ${currentRoom}`);
         }
     });
 });
+
+// Render Keep-Alive System: Pings itself every 14 minutes to prevent winding down
+const RENDER_URL = process.env.RENDER_EXTERNAL_URL;
+if (RENDER_URL) {
+    setInterval(() => {
+        console.log(`Sending keep-alive ping to ${RENDER_URL}`);
+        https.get(RENDER_URL, (res) => {
+            console.log(`Keep-alive response status: ${res.statusCode}`);
+        }).on('error', (err) => {
+            console.error('Keep-alive ping error:', err.message);
+        });
+    }, 14 * 60 * 1000); // 14 minutes in milliseconds
+}
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
