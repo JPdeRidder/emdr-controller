@@ -218,6 +218,7 @@
         t_alert_ready: "✓ Patient controller connected & ready", txt_t: "Therapist",
         txt_p: "Patient", status_disc: "Disconnected", status_wait: "Connected. Awaiting Controller Binding...",
         status_ready: "Controller Synced & Ready", status_active: "Session Active",
+        status_disc_conn: "Controller Disconnected!",
         err_code: "Please enter the exact 4-character code provided by the therapist.",
         code_label: "Code:"
      },
@@ -233,6 +234,7 @@
         t_alert_ready: "✓ Patient-Controller verbunden & bereit", txt_t: "Therapeut",
         txt_p: "Patient", status_disc: "Getrennt", status_wait: "Verbunden. Warte auf Controller...",
         status_ready: "Controller synchronisiert & bereit", status_active: "Sitzung Aktiv",
+        status_disc_conn: "Controller getrennt!",
         err_code: "Bitte geben Sie den exakten 4-stelligen Code ein, den Sie vom Therapeuten erhalten haben.",
         code_label: "Code:"
     },
@@ -248,6 +250,7 @@
         t_alert_ready: "✓ Mando del paciente conectado y listo", txt_t: "Terapeuta",
         txt_p: "Paciente", status_disc: "Desconectado", status_wait: "Conectado. Esperando vinculación del mando...",
         status_ready: "Mando sincronizado y listo", status_active: "Sesión Activa",
+        status_disc_conn: "¡Mando desconectado!",
         err_code: "Por favor, ingrese el código exacto de 4 caracteres proporcionado por el terapeuta.",
         code_label: "Código:"
     },
@@ -263,6 +266,7 @@
         t_alert_ready: "✓ Manette du patient connectée & prête", txt_t: "Thérapeute",
         txt_p: "Patient", status_disc: "Déconnecté", status_wait: "Connecté. En attente de la manette...",
         status_ready: "Manette synchronisée & prête", status_active: "Session Active",
+        status_disc_conn: "Manette déconnectée !",
         err_code: "Veuillez saisir le code exact à 4 caractères fourni par le thérapeute.",
         code_label: "Code :"
     },
@@ -278,287 +282,269 @@
         t_alert_ready: "✓ Controller van patiënt verbonden & klaar", txt_t: "Therapeut",
         txt_p: "Patiënt", status_disc: "Verbinding verbroken", status_wait: "Verbonden. Wachten op controller...",
         status_ready: "Controller gekoppeld & klaar", status_active: "Sessie Actief",
+        status_disc_conn: "Controller losgekoppeld!",
         err_code: "Voer de exacte 4-cijferige code in die door de therapeut is verstrekt.",
         code_label: "Code:"
     }
 };
 
 const languageConfig = [
-        { code: "de", name: "Deutsch" },
-        { code: "en", name: "English" },
-        { code: "es", name: "Español" },
-        { code: "fr", name: "Français" },
-        { code: "nl", name: "Nederlands" }
-    ];
+    { code: "de", name: "Deutsch" },
+    { code: "en", name: "English" },
+    { code: "es", name: "Español" },
+    { code: "fr", name: "Français" },
+    { code: "nl", name: "Nederlands" }
+];
 
-    let currentLang = "en";
-    const selector = document.getElementById('lang-selector');
+let currentLang = "en";
+const selector = document.getElementById('lang-selector');
 
-    languageConfig.forEach(lang => {
-        const opt = document.createElement('option');
-        opt.value = lang.code;
-        opt.textContent = lang.name;
-        if(lang.code === "en") opt.selected = true;
-        selector.appendChild(opt);
-     });
+languageConfig.forEach(lang => {
+    const opt = document.createElement('option');
+    opt.value = lang.code;
+    opt.textContent = lang.name;
+    if(lang.code === "en") opt.selected = true;
+    selector.appendChild(opt);
+});
 
-    function applyLocalization(langCode) {
-        currentLang = langCode;
-        const dict = translations[langCode];
-        document.getElementById('main-title').textContent = dict.title;
-        document.getElementById('main-sub').textContent = dict.subtitle;
-        document.getElementById('label-role').textContent = dict.role;
-        document.getElementById('btn-therapist').textContent = dict.therapist;
-        document.getElementById('btn-patient').textContent = dict.patient;
-        document.getElementById('text-share-inst').textContent = dict.share_inst;
-        document.getElementById('panic-stop-btn').textContent = dict.panic;
-        document.getElementById('label-bls').textContent = dict.bls;
-        document.getElementById('label-speed').textContent = dict.speed;
-        document.getElementById('label-duration').textContent = dict.duration;
-        document.getElementById('label-intensity').textContent = dict.intensity;
-        document.getElementById('left-label').textContent = dict.left_m;
-        document.getElementById('right-label').textContent = dict.right_m;
-        document.getElementById('alert-stopped').textContent = dict.t_alert_stop;
-        document.getElementById('alert-ready').textContent = dict.t_alert_ready;
-        document.getElementById('txt-rost-t').textContent = dict.txt_t;
-        document.getElementById('txt-rost-p').textContent = dict.txt_p;
-        document.getElementById('badge-label').textContent = dict.code_label;
+function applyLocalization(langCode) {
+    currentLang = langCode;
+    const dict = translations[langCode];
+    document.getElementById('main-title').textContent = dict.title;
+    document.getElementById('main-sub').textContent = dict.subtitle;
+    document.getElementById('label-role').textContent = dict.role;
+    document.getElementById('btn-therapist').textContent = dict.therapist;
+    document.getElementById('btn-patient').textContent = dict.patient;
+    document.getElementById('text-share-inst').textContent = dict.share_inst;
+    document.getElementById('panic-stop-btn').textContent = dict.panic;
+    document.getElementById('label-bls').textContent = dict.bls;
+    document.getElementById('label-speed').textContent = dict.speed;
+    document.getElementById('label-duration').textContent = dict.duration;
+    document.getElementById('label-intensity').textContent = dict.intensity;
+    document.getElementById('left-label').textContent = dict.left_m;
+    document.getElementById('right-label').textContent = dict.right_m;
+    document.getElementById('alert-stopped').textContent = dict.t_alert_stop;
+    document.getElementById('alert-ready').textContent = dict.t_alert_ready;
+    document.getElementById('txt-rost-t').textContent = dict.txt_t;
+    document.getElementById('txt-rost-p').textContent = dict.txt_p;
+    document.getElementById('badge-label').textContent = dict.code_label;
 
-        if(userRole === 'therapist') {
-            document.getElementById('input-heading').textContent = dict.t_heading;
-            joinBtn.textContent = dict.btn_start;
-        } else {
-            document.getElementById('input-heading').textContent = dict.p_heading;
-            joinBtn.textContent = dict.btn_join;
+    if(userRole === 'therapist') {
+        document.getElementById('input-heading').textContent = dict.t_heading;
+        joinBtn.textContent = dict.btn_start;
+    } else {
+        document.getElementById('input-heading').textContent = dict.p_heading;
+        joinBtn.textContent = dict.btn_join;
+    }
+    updateUIValues();
+}
+
+selector.addEventListener('change', (e) => applyLocalization(e.target.value));
+
+const socket = io();
+const setupBox = document.getElementById('setup-box');
+const btnTherapist = document.getElementById('btn-therapist');
+const btnPatient = document.getElementById('btn-patient');
+const inputHeading = document.getElementById('input-heading');
+const tView = document.getElementById('therapist-code-view');
+const pView = document.getElementById('patient-code-view');
+const codeText = document.getElementById('generated-code-text');
+const roomInput = document.getElementById('room-input');
+const joinBtn = document.getElementById('join-btn');
+const appContent = document.getElementById('app-content');
+
+const statusDiv = document.getElementById('status');
+const powerSwitch = document.getElementById('power-switch');
+const speedSlider = document.getElementById('speed');
+const durationSlider = document.getElementById('duration');
+const intensitySlider = document.getElementById('intensity');
+const panicStopBtn = document.getElementById('panic-stop-btn');
+
+const speedVal = document.getElementById('speed-val');
+const durationVal = document.getElementById('duration-val');
+const intensityVal = document.getElementById('intensity-val');
+
+const leftLabel = document.getElementById('left-label');
+const rightLabel = document.getElementById('right-label');
+const rosterTDot = document.getElementById('roster-t-dot');
+const rosterPDot = document.getElementById('roster-p-dot');
+const alertStoppedBanner = document.getElementById('alert-stopped');
+const alertReadyBanner = document.getElementById('alert-ready');
+const badgeCode = document.getElementById('badge-code');
+
+let gamepadIndex = null;
+let rhythmTimeout = null;
+let isLeftTurn = true;
+let inRoom = false;
+let userRole = 'therapist';
+let activeRoomCode = "";
+
+const speedMapping = {
+    1: 1500, 2: 1200, 3: 1000, 4: 800, 5: 650,
+    6: 500,  7: 400,  8: 320,  9: 250, 10: 180
+};
+
+function makeRandomCode() {
+    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 4; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result.toUpperCase();
+}
+
+activeRoomCode = makeRandomCode();
+codeText.textContent = activeRoomCode;
+badgeCode.textContent = activeRoomCode;
+
+function setRole(role) {
+    userRole = role;
+    const dict = translations[currentLang];
+    if (role === 'therapist') {
+        document.body.classList.remove('select-patient');
+        btnTherapist.classList.add('active');
+        btnPatient.classList.remove('active');
+        inputHeading.textContent = dict.t_heading;
+        tView.style.display = "block";
+        pView.style.display = "none";
+        joinBtn.textContent = dict.btn_start;
+    } else {
+        document.body.classList.add('select-patient');
+        btnTherapist.classList.remove('active');
+        btnPatient.classList.add('active');
+        inputHeading.textContent = dict.p_heading;
+        tView.style.display = "none";
+        pView.style.display = "block";
+        joinBtn.textContent = dict.btn_join;
+    }
+}
+
+btnTherapist.addEventListener('click', () => setRole('therapist'));
+btnPatient.addEventListener('click', () => setRole('patient'));
+
+joinBtn.addEventListener('click', () => {
+    if (userRole === 'therapist') {
+        window.activeRoom = activeRoomCode;
+    } else {
+        window.activeRoom = roomInput.value.trim().toUpperCase();
+        if (window.activeRoom.length !== 4) {
+            alert(translations[currentLang].err_code);
+            return;
         }
-        updateUIValues();
     }
 
-    selector.addEventListener('change', (e) => applyLocalization(e.target.value));
+    document.getElementById('lang-picker-wrapper').style.display = "none";
+    socket.emit('joinRoom', { roomCode: window.activeRoom, role: userRole });
+    setupBox.style.display = 'none';
+    appContent.classList.add('active');
+    inRoom = true;
+    badgeCode.textContent = window.activeRoom;
 
-    const socket = io();
-    const setupBox = document.getElementById('setup-box');
-    const btnTherapist = document.getElementById('btn-therapist');
-    const btnPatient = document.getElementById('btn-patient');
-    const inputHeading = document.getElementById('input-heading');
-    const tView = document.getElementById('therapist-code-view');
-    const pView = document.getElementById('patient-code-view');
-    const codeText = document.getElementById('generated-code-text');
-    const roomInput = document.getElementById('room-input');
-    const joinBtn = document.getElementById('join-btn');
-    const appContent = document.getElementById('app-content');
-
-    const statusDiv = document.getElementById('status');
-    const powerSwitch = document.getElementById('power-switch');
-    const speedSlider = document.getElementById('speed');
-    const durationSlider = document.getElementById('duration');
-    const intensitySlider = document.getElementById('intensity');
-    const panicStopBtn = document.getElementById('panic-stop-btn');
-
-    const speedVal = document.getElementById('speed-val');
-    const durationVal = document.getElementById('duration-val');
-    const intensityVal = document.getElementById('intensity-val');
-
-    const leftLabel = document.getElementById('left-label');
-    const rightLabel = document.getElementById('right-label');
-    const rosterTDot = document.getElementById('roster-t-dot');
-    const rosterPDot = document.getElementById('roster-p-dot');
-    const alertStoppedBanner = document.getElementById('alert-stopped');
-    const alertReadyBanner = document.getElementById('alert-ready');
-    const badgeCode = document.getElementById('badge-code');
-
-    let gamepadIndex = null;
-    let isLeftTurn = true;
-    let inRoom = false;
-    let userRole = 'therapist';
-    let activeRoomCode = "";
-
-    const speedMapping = {
-        1: 1500, 2: 1200, 3: 1000, 4: 800, 5: 650, 6: 500, 7: 400, 8: 320, 9: 250, 10: 180
-    };
-
-    // --- Dynamic Web Worker Setup ---
-    const workerCode = `let timer = null; self.onmessage = function(e) { if (e.data.action === 'start') { if (timer) clearInterval(timer); timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval); } else if (e.data.action === 'stop') { if (timer) { clearInterval(timer); timer = null; } } };`;
-
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    const worker = new Worker(URL.createObjectURL(blob));
-    worker.onmessage = function(e) {
-        if (e.data === 'tick') {
-            triggerVibrationPulse();
-        }
-    };
-
-    // ---------------------------------
-
-    function makeRandomCode() {
-        const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < 4; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return result.toUpperCase();
+    if (userRole === 'patient') {
+        document.body.classList.add('is-patient');
+        statusDiv.textContent = translations[currentLang].status_wait;
+        statusDiv.className = "status connected";
+    } else {
+        statusDiv.textContent = translations[currentLang].status_active;
+        statusDiv.className = "status remote-only";
     }
+});
 
-    activeRoomCode = makeRandomCode();
-    codeText.textContent = activeRoomCode;
-    badgeCode.textContent = activeRoomCode;
-
-    function setRole(role) {
-        userRole = role;
-        const dict = translations[currentLang];
-        if (role === 'therapist') {
-            document.body.classList.remove('select-patient');
-            btnTherapist.classList.add('active');
-            btnPatient.classList.remove('active');
-            inputHeading.textContent = dict.t_heading;
-            tView.style.display = "block";
-            pView.style.display = "none";
-            joinBtn.textContent = dict.btn_start;
-        } else {
-            document.body.classList.add('select-patient');
-            btnTherapist.classList.remove('active');
-            btnPatient.classList.add('active');
-            inputHeading.textContent = dict.p_heading;
-            tView.style.display = "none";
-            pView.style.display = "block";
-            joinBtn.textContent = dict.btn_join;
-        }
+window.addEventListener("gamepadconnected", (e) => {
+    gamepadIndex = e.gamepad.index;
+    if (inRoom && userRole === 'patient') {
+        statusDiv.textContent = translations[currentLang].status_ready;
+        statusDiv.className = "status connected";
+        socket.emit('updateGamepadStatus', { ready: true });
     }
+});
 
-    btnTherapist.addEventListener('click', () => setRole('therapist'));
-    btnPatient.addEventListener('click', () => setRole('patient'));
-
-    joinBtn.addEventListener('click', () => {
-        if (userRole === 'therapist') {
-            window.activeRoom = activeRoomCode;
-        } else {
-            window.activeRoom = roomInput.value.trim().toUpperCase();
-            if (window.activeRoom.length !== 4) {
-                alert(translations[currentLang].err_code);
-                return;
-            }
-        }
-
-        document.getElementById('lang-picker-wrapper').style.display = "none";
-        socket.emit('joinRoom', { roomCode: window.activeRoom, role: userRole });
-        setupBox.style.display = 'none';
-        appContent.classList.add('active');
-        inRoom = true;
-        badgeCode.textContent = window.activeRoom;
-        if (userRole === 'patient') {
-            document.body.classList.add('is-patient');
-            statusDiv.textContent = translations[currentLang].status_wait;
-            statusDiv.className = "status connected";
-            scanForGamepads();
-        } else {
-            statusDiv.textContent = translations[currentLang].status_active;
-            statusDiv.className = "status remote-only";
-        }
-    });
-
-    function scanForGamepads() {
-        if (userRole !== 'patient') return;
-        const gamepads = navigator.getGamepads();
-        let found = false;
-        for (let i = 0; i < gamepads.length; i++) {
-            if (gamepads[i] && gamepads[i].vibrationActuator) {
-                gamepadIndex = i;
-                statusDiv.textContent = translations[currentLang].status_ready;
-                statusDiv.className = "status connected";
-                socket.emit('updateGamepadStatus', { ready: true });
-                found = true;
-                break;
-            }
-        }
-        if (!found && gamepadIndex !== null) {
-            gamepadIndex = null;
-            statusDiv.textContent = translations[currentLang].status_wait;
+window.addEventListener("gamepaddisconnected", (e) => {
+    if (gamepadIndex === e.gamepad.index) {
+        gamepadIndex = null;
+        if (inRoom && userRole === 'patient') {
+            statusDiv.textContent = translations[currentLang].status_disc_conn;
             statusDiv.className = "status";
             socket.emit('updateGamepadStatus', { ready: false });
         }
-        setTimeout(scanForGamepads, 1000);
+        stopRhythm();
     }
+});
 
-    function broadcastSettings() {
-        if (!inRoom || userRole !== 'therapist') return;
-        socket.emit('updateControls', {
-            enabled: powerSwitch.checked,
-            speed: speedSlider.value,
-            duration: durationSlider.value,
-            intensity: intensitySlider.value
-        });
-    }
-
-    [speedSlider, durationSlider, intensitySlider].forEach(slider => {
-        slider.addEventListener('input', () => {
-            updateUIValues();
-            broadcastSettings();
-            if (powerSwitch.checked) startRhythm();
-        });
+function broadcastSettings() {
+    if (!inRoom || userRole !== 'therapist') return;
+    socket.emit('updateControls', {
+        enabled: powerSwitch.checked,
+        speed: speedSlider.value,
+        duration: durationSlider.value,
+        intensity: intensitySlider.value
     });
+}
 
-    powerSwitch.addEventListener('change', () => {
-        if (powerSwitch.checked) startRhythm();
-        else stopRhythm();
+[speedSlider, durationSlider, intensitySlider].forEach(slider => {
+    slider.addEventListener('input', () => {
+        updateUIValues();
         broadcastSettings();
     });
+});
 
-    panicStopBtn.addEventListener('click', () => {
-        powerSwitch.checked = false;
-        stopRhythm();
-        socket.emit('patientEmergencyStop');
-    });
+powerSwitch.addEventListener('change', () => {
+    if (powerSwitch.checked) startRhythm();
+    else stopRhythm();
+    broadcastSettings();
+});
 
-    socket.on('applyControls', (data) => {
-        powerSwitch.checked = data.enabled;
-        speedSlider.value = data.speed;
-        durationSlider.value = data.duration;
-        intensitySlider.value = data.intensity;
-        updateUIValues();
-        if (data.enabled) startRhythm();
-        else stopRhythm();
-    });
+panicStopBtn.addEventListener('click', () => {
+    powerSwitch.checked = false;
+    stopRhythm();
+    socket.emit('patientEmergencyStop');
+});
 
-    socket.on('sessionStateUpdate', (state) => {
-        if (state.therapist) rosterTDot.classList.add('online');
-        else rosterTDot.classList.remove('online');
-        if (state.patient) rosterPDot.classList.add('online');
-        else rosterPDot.classList.remove('online');
-        if (userRole === 'therapist') {
-            alertReadyBanner.style.display = state.controllerReady ? "block" : "none";
-            alertStoppedBanner.style.display = state.stoppedByPatient ? "block" : "none";
-        }
-    });
+socket.on('applyControls', (data) => {
+    powerSwitch.checked = data.enabled;
+    speedSlider.value = data.speed;
+    durationSlider.value = data.duration;
+    intensitySlider.value = data.intensity;
+    updateUIValues();
+    if (data.enabled) startRhythm();
+    else stopRhythm();
+});
 
-    function updateUIValues() {
-        const lbl = translations[currentLang].lvl;
-        speedVal.textContent = `${lbl} ${speedSlider.value}`;
-        durationVal.textContent = `${durationSlider.value} ms`;
-        intensityVal.textContent = `${Math.round(intensitySlider.value * 100)}%`;
+socket.on('sessionStateUpdate', (state) => {
+    if (state.therapist) rosterTDot.classList.add('online');
+    else rosterTDot.classList.remove('online');
+    if (state.patient) rosterPDot.classList.add('online');
+    else rosterPDot.classList.remove('online');
+    if (userRole === 'therapist') {
+        alertReadyBanner.style.display = state.controllerReady ? "block" : "none";
+        alertStoppedBanner.style.display = state.stoppedByPatient ? "block" : "none";
     }
+});
 
-    function startRhythm() {
+function updateUIValues() {
+    const lbl = translations[currentLang].lvl;
+    speedVal.textContent = `${lbl} ${speedSlider.value}`;
+    durationVal.textContent = `${durationSlider.value} ms`;
+    intensityVal.textContent = `${Math.round(intensitySlider.value * 100)}%`;
+}
+
+function startRhythm() {
+    stopRhythm();
+    
+    const runRhythm = () => {
+        if (!powerSwitch.checked) return;
+
         const sliderLevel = parseInt(speedSlider.value);
         const actualInterval = speedMapping[sliderLevel] || 650;
-        worker.postMessage({ action: 'start', interval: actualInterval });
-    }
-
-    function stopRhythm() {
-        worker.postMessage({ action: 'stop' });
-        leftLabel.className = "";
-        rightLabel.className = "";
-        isLeftTurn = true;
-    }
-
-    function triggerVibrationPulse() {
-        if (!powerSwitch.checked) return;
         const duration = parseInt(durationSlider.value);
         const intensity = parseFloat(intensitySlider.value);
+        
         if (userRole === 'patient' && gamepadIndex !== null) {
             const gamepad = navigator.getGamepads()[gamepadIndex];
             if (gamepad && gamepad.vibrationActuator) {
                 const leftMag = isLeftTurn ? intensity : 0;
                 const rightMag = isLeftTurn ? 0 : intensity;
+
                 gamepad.vibrationActuator.playEffect("dual-rumble", {
                     startDelay: 0,
                     duration: duration,
@@ -567,6 +553,7 @@ const languageConfig = [
                 }).catch(() => {});
             }
         }
+
         if (isLeftTurn) {
             leftLabel.className = "active";
             rightLabel.className = "";
@@ -574,10 +561,23 @@ const languageConfig = [
             leftLabel.className = "";
             rightLabel.className = "active";
         }
-        isLeftTurn = !isLeftTurn;
-    }
 
-    applyLocalization("en");
+        isLeftTurn = !isLeftTurn;
+        rhythmTimeout = setTimeout(runRhythm, actualInterval);
+    };
+
+    runRhythm();
+}
+
+function stopRhythm() {
+    if (rhythmTimeout) clearTimeout(rhythmTimeout);
+    rhythmTimeout = null;
+    leftLabel.className = "";
+    rightLabel.className = "";
+    isLeftTurn = true;
+}
+
+applyLocalization("en");
 </script>
 </body>
 </html>   
