@@ -109,16 +109,28 @@
     </style>
     <script src="/socket.io/socket.io.js"></script>
 </head>
+
 <body>
+
 
 <div class="container">
     <div class="lang-container" id="lang-picker-wrapper">
         <select class="lang-select" id="lang-selector"></select>
     </div>
 
-    <h1 id="main-title">EMDR Tappers</h1>
+    <h1 id="main-title">EMDR Controller stimulation</h1>
     <div class="subtitle" id="main-sub">Secure Bilateral Stimulation</div>
-
+    <div id="browser-alert" style="display:none; 
+        background-color: #d63031; 
+        color: white; 
+        padding: 1rem; 
+        border-radius: 8px; 
+        margin-bottom: 1.5rem; 
+        text-align: left; 
+        font-size: 0.9rem; 
+        line-height: 1.4; 
+        border: 2px solid #ff7675;">
+    </div>
     <div class="room-box" id="setup-box">
         <label id="label-role">1. Select Your Role</label>
         <div class="role-switch-container" id="role-toggle-bar">
@@ -423,6 +435,7 @@
             pView.style.display = "block";
             joinBtn.textContent = dict.btn_join;
         }
+    checkBrowserCompatibility();
     }
 
     btnTherapist.addEventListener('click', () => setRole('therapist'));
@@ -458,6 +471,8 @@
             statusDiv.textContent = translations[currentLang].status_active;
             statusDiv.className = "status remote-only";
         }
+    
+        document.getElementById('browser-alert').style.display = "none";
     });
 
     function scanForGamepads() {
@@ -591,6 +606,46 @@
     }
 
     applyLocalization("en");
+
+    // Function to strictly detect Chromium-based engines (Chrome, Edge, Opera) required for haptics
+function isChromiumBrowser() {
+    const ua = navigator.userAgent;
+    const vendor = navigator.vendor;
+    const isChromium = ua.indexOf('Chromium') > -1 || ua.indexOf('Chrome') > -1;
+    const isBlink = vendor === 'Google Inc.' || ua.indexOf('Edg/') > -1 || ua.indexOf('OPR/') > -1;
+    return isChromium && isBlink;
+}
+
+// Function to handle showing the custom translation warning based on the user's role
+function verifySystemCompatibility() {
+    const alertBox = document.getElementById('browser-alert');
+    const isCompatible = isChromiumBrowser();
+
+    if (!isCompatible) {
+        // Customize text array labels to match your multi-language dictionary setup
+        if (userRole === 'patient') {
+            alertBox.innerHTML = `
+                <strong>⚠️ Browser Compatibility Warning:</strong><br>
+                Your current browser does not reliably support controller vibration hardware profiles. 
+                For a proper EMDR session, please use a modern Chromium-based browser such as:
+                <ul>
+                    <li>Google Chrome</li>
+                    <li>Microsoft Edge</li>
+                    <li>Opera</li>
+                </ul>
+            `;
+        } else {
+            alertBox.innerHTML = `
+                <strong>⚠️ System Browser Note:</strong><br>
+                You are connected on a non-Chromium engine. While your control panel functions fully over the network, 
+                game controllers cannot register on this browser if you ever need to attach a device locally. Optimal platforms include Google Chrome or Microsoft Edge.
+            `;
+        }
+        alertBox.style.display = "block";
+    } else {
+        alertBox.style.display = "none";
+    }
+}
 </script>
 </body>
 </html>
