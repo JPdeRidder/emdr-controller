@@ -26,10 +26,47 @@
         }
         h1 { margin-bottom: 0.5rem; font-size: 1.8rem; color: #00adb5; }
         .subtitle { color: #aaaaaa; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        
+        .lang-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+        .lang-select {
+            background-color: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .lang-select:focus { outline: none; border-color: #00adb5; }
+
         .status { padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-weight: bold; background-color: #ff4d4d; }
         .status.connected { background-color: #00c853; }
         .status.remote-only { background-color: #f1c40f; color: #121212; }
         
+        .therapist-alerts { display: block; margin-bottom: 1rem; }
+        body.is-patient .therapist-alerts { display: none !important; }
+        .alert-banner {
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            display: none;
+        }
+        .alert-banner.warn { background-color: #d63031; color: white; display: block; animation: pulse 2s infinite; }
+        .alert-banner.info-ready { background-color: #00adb5; color: white; display: block; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
         .roster-box {
             display: flex;
             justify-content: space-around;
@@ -40,98 +77,24 @@
             border: 1px solid #333;
             font-size: 0.85rem;
         }
-        .roster-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #555;
-            margin-right: 5px;
-        }
+        .roster-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: #555; margin-right: 5px; }
         .roster-dot.online { background-color: #00c853; box-shadow: 0 0 8px #00c853; }
 
-        .room-box {
-            background-color: #2a2a2a;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
+        .room-box { background-color: #2a2a2a; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: left; }
         .room-box label { font-weight: bold; margin-bottom: 0.75rem; display: block; color: #eeeeee; }
         
-        .role-switch-container {
-            position: relative;
-            display: flex;
-            background-color: #121212;
-            border: 2px solid #444;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            padding: 2px;
-            cursor: pointer;
-            user-select: none;
-        }
-        .role-btn {
-            flex: 1;
-            text-align: center;
-            padding: 0.6rem 0;
-            font-weight: bold;
-            font-size: 0.95rem;
-            color: #888888;
-            z-index: 2;
-            transition: color 0.2s ease;
-        }
+        .role-switch-container { position: relative; display: flex; background-color: #121212; border: 2px solid #444; border-radius: 8px; margin-bottom: 1.5rem; padding: 2px; cursor: pointer; user-select: none; }
+        .role-btn { flex: 1; text-align: center; padding: 0.6rem 0; font-weight: bold; font-size: 0.95rem; color: #888888; z-index: 2; transition: color 0.2s ease; }
         .role-btn.active { color: #ffffff; }
-        .switch-slider {
-            position: absolute;
-            top: 2px;
-            bottom: 2px;
-            left: 2px;
-            width: calc(50% - 2px);
-            background-color: #00adb5;
-            border-radius: 6px;
-            z-index: 1;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .switch-slider { position: absolute; top: 2px; bottom: 2px; left: 2px; width: calc(50% - 2px); background-color: #00adb5; border-radius: 6px; z-index: 1; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
         body.select-patient .switch-slider { transform: translateX(100%); }
 
         .input-area { margin-bottom: 1.25rem; }
-        .code-display {
-            font-size: 2.2rem;
-            font-weight: bold;
-            letter-spacing: 4px;
-            color: #00adb5;
-            text-align: center;
-            background: #121212;
-            padding: 0.5rem;
-            border-radius: 6px;
-            border: 1px dashed #00adb5;
-            margin-bottom: 0.5rem;
-        }
+        .code-display { font-size: 2.2rem; font-weight: bold; letter-spacing: 4px; color: #00adb5; text-align: center; background: #121212; padding: 0.5rem; border-radius: 6px; border: 1px dashed #00adb5; margin-bottom: 0.5rem; }
         .code-instruction { font-size: 0.8rem; color: #aaaaaa; text-align: center; display: block; }
-        .room-box input[type="text"] {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 0.75rem;
-            border-radius: 6px;
-            border: 2px solid #444;
-            background-color: #121212;
-            color: #fff;
-            font-size: 1.1rem;
-            text-align: center;
-            letter-spacing: 2px;
-        }
+        .room-box input[type="text"] { width: 100%; box-sizing: border-box; padding: 0.75rem; border-radius: 6px; border: 2px solid #444; background-color: #121212; color: #fff; font-size: 1.1rem; text-align: center; letter-spacing: 2px; }
         
-        .room-box button {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: #00adb5;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 1.1rem;
-        }
+        .room-box button { width: 100%; padding: 0.75rem; background-color: #00adb5; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
         .room-box button:hover { background-color: #008c95; }
         
         .app-content { display: none; }
@@ -142,30 +105,10 @@
 
         .patient-panic-box { display: none; margin-bottom: 2rem; }
         body.is-patient .patient-panic-box { display: block; }
-        .panic-btn {
-            width: 100%;
-            padding: 1.25rem;
-            background-color: #d63031;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(214, 48, 49, 0.4);
-            transition: background 0.2s;
-        }
+        .panic-btn { width: 100%; padding: 1.25rem; background-color: #d63031; color: white; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(214, 48, 49, 0.4); transition: background 0.2s; }
         .panic-btn:hover { background-color: #b32627; }
 
-        .switch-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: #2a2a2a;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
+        .switch-container { display: flex; align-items: center; justify-content: space-between; background-color: #2a2a2a; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; }
         .switch-label { font-weight: bold; color: #eeeeee; }
         .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -187,11 +130,15 @@
 <body>
 
 <div class="container">
-    <h1>EMDR Tappers</h1>
-    <div class="subtitle">Secure Bilateral Stimulation</div>
+    <div class="lang-container" id="lang-picker-wrapper">
+        <select class="lang-select" id="lang-selector"></select>
+    </div>
+
+    <h1 id="main-title">EMDR Tappers</h1>
+    <div class="subtitle" id="main-sub">Secure Bilateral Stimulation</div>
 
     <div class="room-box" id="setup-box">
-        <label>1. Select Your Role</label>
+        <label id="label-role">1. Select Your Role</label>
         <div class="role-switch-container" id="role-toggle-bar">
             <div class="switch-slider" id="ui-slider-block"></div>
             <div class="role-btn active" id="btn-therapist">Therapist</div>
@@ -202,10 +149,10 @@
         <div class="input-area">
             <div id="therapist-code-view">
                 <div class="code-display" id="generated-code-text">XXXX</div>
-                <span class="code-instruction">Share this code with your patient.</span>
+                <span class="code-instruction" id="text-share-inst">Share this code with your patient.</span>
             </div>
             <div id="patient-code-view" style="display: none;">
-                <input type="text" id="room-input" placeholder="Enter 4-character code" maxlength="4">
+                <input type="text" id="room-input" placeholder="Code" maxlength="4">
             </div>
         </div>
         
@@ -215,9 +162,14 @@
     <div id="app-content" class="app-content">
         <div id="status" class="status">Disconnected</div>
 
+        <div class="therapist-alerts">
+            <div id="alert-stopped" class="alert-banner warn">⚠️ Patient stopped stimulation!</div>
+            <div id="alert-ready" class="alert-banner info-ready">✓ Patient controller connected & ready</div>
+        </div>
+
         <div class="roster-box">
-            <span><span id="roster-t-dot" class="roster-dot"></span>Therapist</span>
-            <span><span id="roster-p-dot" class="roster-dot"></span>Patient</span>
+            <span><span id="roster-t-dot" class="roster-dot"></span><span id="txt-rost-t">Therapist</span></span>
+            <span><span id="roster-p-dot" class="roster-dot"></span><span id="txt-rost-p">Patient</span></span>
         </div>
         
         <div class="patient-panic-box">
@@ -226,7 +178,7 @@
 
         <div class="patient-hidden">
             <div class="switch-container">
-                <span class="switch-label">Bilateral Stimulation</span>
+                <span class="switch-label" id="label-bls">Bilateral Stimulation</span>
                 <label class="switch">
                     <input type="checkbox" id="power-switch">
                     <span class="slider"></span>
@@ -234,19 +186,19 @@
             </div>
             
             <div class="control-group">
-                <label for="speed">Speed (Slow ◄► Fast)</label>
+                <label for="speed" id="label-speed">Speed (Slow ◄► Fast)</label>
                 <input type="range" id="speed" min="1" max="10" value="5" step="1">
                 <span class="value-display" id="speed-val">Level 5</span>
             </div>
 
             <div class="control-group">
-                <label for="duration">Pulse Duration (Length of tap)</label>
+                <label for="duration" id="label-duration">Pulse Duration (Length of tap)</label>
                 <input type="range" id="duration" min="40" max="500" value="120" step="10">
                 <span class="value-display" id="duration-val">120 ms</span>
             </div>
 
             <div class="control-group">
-                <label for="intensity">Vibration Intensity</label>
+                <label for="intensity" id="label-intensity">Vibration Intensity</label>
                 <input type="range" id="intensity" min="0.1" max="1" value="0.6" step="0.05">
                 <span class="value-display" id="intensity-val">60%</span>
             </div>
@@ -260,8 +212,133 @@
 </div>
 
 <script>
-    const socket = io();
+    const translations = {
+        en: {
+            title: "EMDR Tappers", subtitle: "Secure Bilateral Stimulation",
+            role: "1. Select Your Role", therapist: "Therapist", patient: "Patient",
+            t_heading: "Your Session Code", p_heading: "Enter Therapist's Code",
+            share_inst: "Share this code with your patient.", btn_start: "Start Session",
+            btn_join: "Join Session", panic: "STOP STIMULATION", bls: "Bilateral Stimulation",
+            speed: "Speed (Slow ◄► Fast)", duration: "Pulse Duration (Length of tap)",
+            intensity: "Vibration Intensity", lvl: "Level", left_m: "◄ LEFT MOTOR",
+            right_m: "RIGHT MOTOR ►", t_alert_stop: "⚠️ Patient stopped stimulation!",
+            t_alert_ready: "✓ Patient controller connected & ready", txt_t: "Therapist",
+            txt_p: "Patient", status_disc: "Disconnected", status_wait: "Connected. Awaiting Controller Binding...",
+            status_ready: "Controller Synced & Ready", status_active: "Session Active",
+            err_code: "Please enter the exact 4-character code provided by the therapist."
+        },
+        de: {
+            title: "EMDR Tappers", subtitle: "Sichere bilaterale Stimulation",
+            role: "1. Wählen Sie Ihre Rolle", therapist: "Therapeut", patient: "Patient",
+            t_heading: "Ihr Sitzungscode", p_heading: "Code des Therapeuten eingeben",
+            share_inst: "Teilen Sie diesen Code mit Ihrem Patienten.", btn_start: "Sitzung starten",
+            btn_join: "Sitzung beitreten", panic: "STIMULATION STOPPEN", bls: "Bilaterale Stimulation",
+            speed: "Geschwindigkeit (Langsam ◄► Schnell)", duration: "Impulsdauer (Länge des Tippens)",
+            intensity: "Vibrationsintensität", lvl: "Stufe", left_m: "◄ LINKER MOTOR",
+            right_m: "RECHTER MOTOR ►", t_alert_stop: "⚠️ Patient hat die Stimulation gestoppt!",
+            t_alert_ready: "✓ Patient-Controller verbunden & bereit", txt_t: "Therapeut",
+            txt_p: "Patient", status_disc: "Getrennt", status_wait: "Verbunden. Warte auf Controller...",
+            status_ready: "Controller synchronisiert & bereit", status_active: "Sitzung Aktiv",
+            err_code: "Bitte geben Sie den exakten 4-stelligen Code ein, den Sie vom Therapeuten erhalten haben."
+        },
+        es: {
+            title: "EMDR Tappers", subtitle: "Estimulación Bilateral Segura",
+            role: "1. Seleccione su Rol", therapist: "Terapeuta", patient: "Paciente",
+            t_heading: "Su Código de Sesión", p_heading: "Ingrese Código del Terapeuta",
+            share_inst: "Comparta este código con su paciente.", btn_start: "Iniciar Sesión",
+            btn_join: "Unirse a la Sesión", panic: "DETENER ESTIMULACIÓN", bls: "Estimulación Bilateral",
+            speed: "Velocidad (Lento ◄► Rápido)", duration: "Duración del Pulso (Longitud del toque)",
+            intensity: "Intensidad de Vibración", lvl: "Nivel", left_m: "◄ MOTOR IZQUIERDO",
+            right_m: "MOTOR DERECHO ►", t_alert_stop: "⚠️ ¡El paciente detuvo la estimulación!",
+            t_alert_ready: "✓ Mando del paciente conectado y listo", txt_t: "Terapeuta",
+            txt_p: "Paciente", status_disc: "Desconectado", status_wait: "Conectado. Esperando vinculación del mando...",
+            status_ready: "Mando sincronizado y listo", status_active: "Sesión Activa",
+            err_code: "Por favor, ingrese el código exacto de 4 caracteres proporcionado por el terapeuta."
+        },
+        fr: {
+            title: "EMDR Tappers", subtitle: "Stimulation Bilatérale Sécurisée",
+            role: "1. Sélectionnez Votre Rôle", therapist: "Thérapeute", patient: "Patient",
+            t_heading: "Votre Code de Session", p_heading: "Entrez le Code du Thérapeute",
+            share_inst: "Partagez ce code avec votre patient.", btn_start: "Démarrer la Session",
+            btn_join: "Rejoindre la Session", panic: "ARRÊTER LA STIMULATION", bls: "Stimulation Bilatérale",
+            speed: "Vitesse (Lent ◄► Rapide)", duration: "Durée de l'Impulsion (Longueur de la tape)",
+            intensity: "Intensité de Vibration", lvl: "Niveau", left_m: "◄ MOTEUR GAUCHE",
+            right_m: "MOTEUR DROIT ►", t_alert_stop: "⚠️ Le patient a arrêté la stimulation !",
+            t_alert_ready: "✓ Manette du patient connectée & prête", txt_t: "Thérapeute",
+            txt_p: "Patient", status_disc: "Décutécté", status_wait: "Connecté. En attente de la manette...",
+            status_ready: "Manette synchronisée & prête", status_active: "Session Active",
+            err_code: "Veuillez saisir le code exact à 4 caractères fourni par le thérapeute."
+        },
+        nl: {
+            title: "EMDR Tappers", subtitle: "Veilige Bilaterale Stimulatie",
+            role: "1. Kies Uw Rol", therapist: "Therapeut", patient: "Patiënt",
+            t_heading: "Uw Sessiecode", p_heading: "Voer Code van Therapeut in",
+            share_inst: "Deel deze code met uw patiënt.", btn_start: "Sessie Starten",
+            btn_join: "Deelnemen aan Sessie", panic: "STIMULATIE STOPPEN", bls: "Bilaterale Stimulatie",
+            speed: "Snelheid (Langzaam ◄► Snel)", duration: "Pulsduur (Lengte van de tik)",
+            intensity: "Vibratie-intensiteit", lvl: "Niveau", left_m: "◄ LINKER MOTOR",
+            right_m: "RECHTER MOTOR ►", t_alert_stop: "⚠️ Patiënt heeft stimulatie gestopt!",
+            t_alert_ready: "✓ Controller van patiënt verbonden & klaar", txt_t: "Therapeut",
+            txt_p: "Patiënt", status_disc: "Verbinding verbroken", status_wait: "Verbonden. Wachten op controller...",
+            status_ready: "Controller gekoppeld & klaar", status_active: "Sessie Actief",
+            err_code: "Voer de exacte 4-cijferige code in die door de therapeut is verstrekt."
+        }
+    };
 
+    const languageConfig = [
+        { code: "de", name: "Deutsch" },
+        { code: "en", name: "English" },
+        { code: "es", name: "Español" },
+        { code: "fr", name: "Français" },
+        { code: "nl", name: "Nederlands" }
+    ];
+
+    let currentLang = "en";
+    const selector = document.getElementById('lang-selector');
+
+    languageConfig.forEach(lang => {
+        const opt = document.createElement('option');
+        opt.value = lang.code;
+        opt.textContent = lang.name;
+        if(lang.code === "en") opt.selected = true;
+        selector.appendChild(opt);
+    });
+
+    function applyLocalization(langCode) {
+        currentLang = langCode;
+        const dict = translations[langCode];
+        
+        document.getElementById('main-title').textContent = dict.title;
+        document.getElementById('main-sub').textContent = dict.subtitle;
+        document.getElementById('label-role').textContent = dict.role;
+        document.getElementById('btn-therapist').textContent = dict.therapist;
+        document.getElementById('btn-patient').textContent = dict.patient;
+        document.getElementById('text-share-inst').textContent = dict.share_inst;
+        document.getElementById('panic-stop-btn').textContent = dict.panic;
+        document.getElementById('label-bls').textContent = dict.bls;
+        document.getElementById('label-speed').textContent = dict.speed;
+        document.getElementById('label-duration').textContent = dict.duration;
+        document.getElementById('label-intensity').textContent = dict.intensity;
+        document.getElementById('left-label').textContent = dict.left_m;
+        document.getElementById('right-label').textContent = dict.right_m;
+        document.getElementById('alert-stopped').textContent = dict.t_alert_stop;
+        document.getElementById('alert-ready').textContent = dict.t_alert_ready;
+        document.getElementById('txt-rost-t').textContent = dict.txt_t;
+        document.getElementById('txt-rost-p').textContent = dict.txt_p;
+        
+        if(userRole === 'therapist') {
+            document.getElementById('input-heading').textContent = dict.t_heading;
+            joinBtn.textContent = dict.btn_start;
+        } else {
+            document.getElementById('input-heading').textContent = dict.p_heading;
+            joinBtn.textContent = dict.btn_join;
+        }
+        updateUIValues();
+    }
+
+    selector.addEventListener('change', (e) => applyLocalization(e.target.value));
+
+    const socket = io();
     const setupBox = document.getElementById('setup-box');
     const btnTherapist = document.getElementById('btn-therapist');
     const btnPatient = document.getElementById('btn-patient');
@@ -288,6 +365,8 @@
     const rightLabel = document.getElementById('right-label');
     const rosterTDot = document.getElementById('roster-t-dot');
     const rosterPDot = document.getElementById('roster-p-dot');
+    const alertStoppedBanner = document.getElementById('alert-stopped');
+    const alertReadyBanner = document.getElementById('alert-ready');
 
     let gamepadIndex = null;
     let rhythmTimeout = null;
@@ -297,8 +376,7 @@
     let activeRoomCode = "";
 
     const speedMapping = {
-        1: 1500, 2: 1200, 3: 1000, 4: 800, 5: 650, 
-        6: 500,  7: 400,  8: 320,  9: 250, 10: 180
+        1: 1500, 2: 1200, 3: 1000, 4: 800, 5: 650, 6: 500, 7: 400, 8: 320, 9: 250, 10: 180
     };
 
     function makeRandomCode() {
@@ -315,22 +393,23 @@
 
     function setRole(role) {
         userRole = role;
+        const dict = translations[currentLang];
         if (role === 'therapist') {
             document.body.classList.remove('select-patient');
             btnTherapist.classList.add('active');
             btnPatient.classList.remove('active');
-            inputHeading.textContent = "Your Session Code";
+            inputHeading.textContent = dict.t_heading;
             tView.style.display = "block";
             pView.style.display = "none";
-            joinBtn.textContent = "Start Session";
+            joinBtn.textContent = dict.btn_start;
         } else {
             document.body.classList.add('select-patient');
             btnTherapist.classList.remove('active');
             btnPatient.classList.add('active');
-            inputHeading.textContent = "Enter Therapist's Code";
+            inputHeading.textContent = dict.p_heading;
             tView.style.display = "none";
             pView.style.display = "block";
-            joinBtn.textContent = "Join Session";
+            joinBtn.textContent = dict.btn_join;
         }
     }
 
@@ -343,11 +422,12 @@
         } else {
             window.activeRoom = roomInput.value.trim().toUpperCase();
             if (window.activeRoom.length !== 4) {
-                alert("Please enter the exact 4-character code provided by the therapist.");
+                alert(translations[currentLang].err_code);
                 return;
             }
         }
 
+        document.getElementById('lang-picker-wrapper').style.display = "none";
         socket.emit('joinRoom', { roomCode: window.activeRoom, role: userRole });
         
         setupBox.style.display = 'none';
@@ -356,32 +436,37 @@
 
         if (userRole === 'patient') {
             document.body.classList.add('is-patient');
-            statusDiv.textContent = "Connected. Awaiting Controller Binding...";
+            statusDiv.textContent = translations[currentLang].status_wait;
             statusDiv.className = "status connected";
+            scanForGamepads();
         } else {
-            statusDiv.textContent = "Session Active";
+            statusDiv.textContent = translations[currentLang].status_active;
             statusDiv.className = "status remote-only";
         }
     });
 
-    window.addEventListener("gamepadconnected", (e) => {
-        gamepadIndex = e.gamepad.index;
-        if (inRoom && userRole === 'patient') {
-            statusDiv.textContent = "Controller Synced & Ready";
-            statusDiv.className = "status connected";
-        }
-    });
-
-    window.addEventListener("gamepaddisconnected", (e) => {
-        if (gamepadIndex === e.gamepad.index) {
-            gamepadIndex = null;
-            if (inRoom && userRole === 'patient') {
-                statusDiv.textContent = "Controller Disconnected!";
-                statusDiv.className = "status";
+    function scanForGamepads() {
+        if (userRole !== 'patient') return;
+        const gamepads = navigator.getGamepads();
+        let found = false;
+        for (let i = 0; i < gamepads.length; i++) {
+            if (gamepads[i] && gamepads[i].vibrationActuator) {
+                gamepadIndex = i;
+                statusDiv.textContent = translations[currentLang].status_ready;
+                statusDiv.className = "status connected";
+                socket.emit('updateGamepadStatus', { ready: true });
+                found = true;
+                break;
             }
-            stopRhythm();
         }
-    });
+        if (!found && gamepadIndex !== null) {
+            gamepadIndex = null;
+            statusDiv.textContent = translations[currentLang].status_wait;
+            statusDiv.className = "status";
+            socket.emit('updateGamepadStatus', { ready: false });
+        }
+        setTimeout(scanForGamepads, 1000);
+    }
 
     function broadcastSettings() {
         if (!inRoom || userRole !== 'therapist') return;
@@ -409,12 +494,7 @@
     panicStopBtn.addEventListener('click', () => {
         powerSwitch.checked = false;
         stopRhythm();
-        socket.emit('updateControls', {
-            enabled: false,
-            speed: speedSlider.value,
-            duration: durationSlider.value,
-            intensity: intensitySlider.value
-        });
+        socket.emit('patientEmergencyStop');
     });
 
     socket.on('applyControls', (data) => {
@@ -429,16 +509,22 @@
         else stopRhythm();
     });
 
-    socket.on('rosterUpdate', (presence) => {
-        if (presence.therapist) rosterTDot.classList.add('online');
+    socket.on('sessionStateUpdate', (state) => {
+        if (state.therapist) rosterTDot.classList.add('online');
         else rosterTDot.classList.remove('online');
 
-        if (presence.patient) rosterPDot.classList.add('online');
+        if (state.patient) rosterPDot.classList.add('online');
         else rosterPDot.classList.remove('online');
+
+        if (userRole === 'therapist') {
+            alertReadyBanner.style.display = state.controllerReady ? "block" : "none";
+            alertStoppedBanner.style.display = state.stoppedByPatient ? "block" : "none";
+        }
     });
 
     function updateUIValues() {
-        speedVal.textContent = `Level ${speedSlider.value}`;
+        const lbl = translations[currentLang].lvl;
+        speedVal.textContent = `${lbl} ${speedSlider.value}`;
         durationVal.textContent = `${durationSlider.value} ms`;
         intensityVal.textContent = `${Math.round(intensitySlider.value * 100)}%`;
     }
@@ -450,7 +536,7 @@
             if (!powerSwitch.checked) return;
 
             const sliderLevel = parseInt(speedSlider.value);
-            const actualInterval = speedMapping[sliderLevel] || 600; 
+            const actualInterval = speedMapping[sliderLevel] || 650;
             const duration = parseInt(durationSlider.value);
             const intensity = parseFloat(intensitySlider.value);
             
@@ -490,6 +576,8 @@
         rightLabel.className = "";
         isLeftTurn = true;
     }
+
+    applyLocalization("en");
 </script>
 </body>
 </html>
